@@ -1,0 +1,51 @@
+version: "3.8"
+name: "conditional-response"
+services:
+  keycloak:
+    container_name: conditional-response-keycloak
+    image: quay.io/keycloak/keycloak:22.0.3
+    ports:
+      - "8484:8080"
+    command:
+      - start-dev
+    environment:
+      KEYCLOAK_ADMIN: "admin"
+      KEYCLOAK_ADMIN_PASSWORD: "admin"
+      DB_VENDOR: "POSTGRES"
+      DB_ADDR: "conditional-response-postgres"
+      DB_DATABASE: "conditional-response"
+      DB_USER: "username"
+      DB_PASSWORD: "password"
+
+  backend:
+    container_name: conditional-response-backend
+    image: conditional-response/backend
+    ports:
+      - "8485:8080"
+    build:
+      context: ./backend
+    environment:
+      DB_URL: "r2dbc:postgresql://conditional-response-postgres:5432/conditional-response"
+      DB_USER: "username"
+      DB_PASSWORD: "password"
+      KEYCLOAK_URL: http://conditional-response-keycloak:8080
+
+  db:
+    container_name: conditional-response-postgres
+    image: postgres:16-alpine
+    ports:
+      - "5440:5432"
+    environment:
+      POSTGRES_USER: "username"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_DB: "conditional-response"
+
+  frontend:
+    container_name: conditional-response-frontend
+    image: node:18.13.0-alpine
+    ports:
+      - "4222:4200"
+    volumes:
+      - ./frontend:/usr/src/app
+    command: >
+      sh -c "cd /usr/src/app && npm install && npm run start"

@@ -1,0 +1,54 @@
+openapi: "3.0.2"
+info:
+  title: Conditional Response Backend API
+  version: "1.0"
+servers:
+  - url: http://localhost:8485
+    description: local
+tags:
+  - name: Book
+paths:
+  /books:
+    get:
+      tags:
+        - Book
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Book"
+  /books/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - Book
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Book"
+components:
+  schemas:
+    Book:
+      type: object
+      required:
+        - id
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
